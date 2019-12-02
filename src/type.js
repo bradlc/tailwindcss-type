@@ -5,7 +5,7 @@ module.exports = function type({ theme, addComponents, e }) {
   let output = {}
 
   for (let name of Object.keys(typeStyles)) {
-    let { fontSize, crop, ...props } = typeStyles[name]
+    let { fontSize, fontFamily, crop, ...props } = typeStyles[name]
     let className = e(`type-${name}`)
 
     output[`.${className}`] = {
@@ -38,6 +38,10 @@ module.exports = function type({ theme, addComponents, e }) {
     })
 
     output[`.${className}`].fontSize = baseFontSize
+    if (fontFamily) {
+      output[`.${className}`].fontFamily =
+        fontFamily.constructor === Array ? fontFamily.join(', ') : fontFamily
+    }
     output = { ...output, ...responsiveFontSizeComponents }
   }
 
