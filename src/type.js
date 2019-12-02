@@ -2,30 +2,31 @@ const polyFluidSizing = require('./polyFluidSizing.js')
 
 module.exports = function type({ theme, addComponents, e }) {
   let typeStyles = theme('type')
-  let output = {}
+  let output = []
 
   for (let name of Object.keys(typeStyles)) {
     let { fontSize, fontFamily, crop, ...props } = typeStyles[name]
     let className = e(`type-${name}`)
+    let rules = {}
 
-    output[`.${className}`] = {
+    rules[`.${className}`] = {
       ...props,
       paddingTop: 1,
       paddingBottom: 1
     }
 
-    output[`.${className}::before, .${className}::after`] = {
+    rules[`.${className}::before, .${className}::after`] = {
       content: '""',
       display: 'block',
       width: 0,
       height: 0
     }
 
-    output[`.${className}::before`] = {
+    rules[`.${className}::before`] = {
       marginBottom: getTopCropStyle(crop, props.lineHeight)
     }
 
-    output[`.${className}::after`] = {
+    rules[`.${className}::after`] = {
       marginTop: getBottomCropStyle(crop, props.lineHeight)
     }
 
@@ -37,14 +38,16 @@ module.exports = function type({ theme, addComponents, e }) {
       rootFontSize: 10
     })
 
-    output[`.${className}`].fontSize = baseFontSize
+    rules[`.${className}`].fontSize = baseFontSize
     if (fontFamily) {
-      output[`.${className}`].fontFamily =
+      rules[`.${className}`].fontFamily =
         fontFamily.constructor === Array
           ? fontFamily.map(f => (/[^a-z-]/i.test(f) ? `"${f}"` : f)).join(', ')
           : fontFamily
     }
-    output = { ...output, ...responsiveFontSizeComponents }
+    rules = { ...rules, ...responsiveFontSizeComponents }
+
+    output.push(rules)
   }
 
   addComponents(output)
