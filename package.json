@@ -1,0 +1,10 @@
+{
+  "name": "tailwindcss-type",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/type.js",
+  "files": ["src/*"],
+  "keywords": ["tailwindcss", "tailwind"],
+  "author": "Brad Cornes <hello@bradley.dev>",
+  "license": "MIT"
+}
