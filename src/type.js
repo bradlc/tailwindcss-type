@@ -1,56 +1,60 @@
 const polyFluidSizing = require('./polyFluidSizing.js')
 
-module.exports = function type({ theme, addComponents, e }) {
-  let typeStyles = theme('type')
-  let output = []
+module.exports = function type({ rootFontSize = 16 }) {
+  return ({ theme, addComponents, e }) => {
+    let typeStyles = theme('type')
+    let output = []
 
-  for (let name of Object.keys(typeStyles)) {
-    let { fontSize, fontFamily, crop, ...props } = typeStyles[name]
-    let className = e(`type-${name}`)
-    let rules = {}
+    for (let name of Object.keys(typeStyles)) {
+      let { fontSize, fontFamily, crop, ...props } = typeStyles[name]
+      let className = e(`type-${name}`)
+      let rules = {}
 
-    rules[`.${className}`] = {
-      ...props,
-      paddingTop: 1,
-      paddingBottom: 1
+      rules[`.${className}`] = {
+        ...props,
+        paddingTop: 1,
+        paddingBottom: 1
+      }
+
+      rules[`.${className}::before, .${className}::after`] = {
+        content: '""',
+        display: 'block',
+        width: 0,
+        height: 0
+      }
+
+      rules[`.${className}::before`] = {
+        marginBottom: getTopCropStyle(crop, props.lineHeight)
+      }
+
+      rules[`.${className}::after`] = {
+        marginTop: getBottomCropStyle(crop, props.lineHeight)
+      }
+
+      let {
+        [`.${className}`]: { fontSize: baseFontSize },
+        ...responsiveFontSizeComponents
+      } = polyFluidSizing(`.${className}`, 'fontSize', fontSize, {
+        rem: true,
+        rootFontSize
+      })
+
+      rules[`.${className}`].fontSize = baseFontSize
+      if (fontFamily) {
+        rules[`.${className}`].fontFamily =
+          fontFamily.constructor === Array
+            ? fontFamily
+                .map(f => (/[^a-z-]/i.test(f) ? `"${f}"` : f))
+                .join(', ')
+            : fontFamily
+      }
+      rules = { ...rules, ...responsiveFontSizeComponents }
+
+      output.push(rules)
     }
 
-    rules[`.${className}::before, .${className}::after`] = {
-      content: '""',
-      display: 'block',
-      width: 0,
-      height: 0
-    }
-
-    rules[`.${className}::before`] = {
-      marginBottom: getTopCropStyle(crop, props.lineHeight)
-    }
-
-    rules[`.${className}::after`] = {
-      marginTop: getBottomCropStyle(crop, props.lineHeight)
-    }
-
-    let {
-      [`.${className}`]: { fontSize: baseFontSize },
-      ...responsiveFontSizeComponents
-    } = polyFluidSizing(`.${className}`, 'fontSize', fontSize, {
-      rem: true,
-      rootFontSize: 10
-    })
-
-    rules[`.${className}`].fontSize = baseFontSize
-    if (fontFamily) {
-      rules[`.${className}`].fontFamily =
-        fontFamily.constructor === Array
-          ? fontFamily.map(f => (/[^a-z-]/i.test(f) ? `"${f}"` : f)).join(', ')
-          : fontFamily
-    }
-    rules = { ...rules, ...responsiveFontSizeComponents }
-
-    output.push(rules)
+    addComponents(output)
   }
-
-  addComponents(output)
 }
 
 function getTopCropStyle(crop, lineHeight) {

@@ -25,7 +25,7 @@ module.exports = {
     }
   },
   plugins: [
-    require('tailwindcss-type')
+    require('tailwindcss-type')({ rootFontSize: 16 })
   ]
 }
 ```
