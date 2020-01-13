@@ -10,25 +10,27 @@ module.exports = function type({ rootFontSize = 16 }) {
       let className = e(`type-${name}`)
       let rules = {}
 
-      rules[`.${className}`] = {
-        ...props,
-        paddingTop: 1,
-        paddingBottom: 1
-      }
+      rules[`.${className}`] = props
 
-      rules[`.${className}::before, .${className}::after`] = {
-        content: '""',
-        display: 'block',
-        width: 0,
-        height: 0
-      }
+      if (crop) {
+        rules[`.${className}`].paddingTop = rules[
+          `.${className}`
+        ].paddingBottom = 1
 
-      rules[`.${className}::before`] = {
-        marginBottom: getTopCropStyle(crop, props.lineHeight)
-      }
+        rules[`.${className}::before, .${className}::after`] = {
+          content: '""',
+          display: 'block',
+          width: 0,
+          height: 0
+        }
 
-      rules[`.${className}::after`] = {
-        marginTop: getBottomCropStyle(crop, props.lineHeight)
+        rules[`.${className}::before`] = {
+          marginBottom: getTopCropStyle(crop, props.lineHeight)
+        }
+
+        rules[`.${className}::after`] = {
+          marginTop: getBottomCropStyle(crop, props.lineHeight)
+        }
       }
 
       let {
