@@ -6,44 +6,57 @@ module.exports = function type({ rootFontSize = 16 }) {
     let output = []
 
     for (let name of Object.keys(typeStyles)) {
-      let { fontSize, fontFamily, crop, ...props } = typeStyles[name]
-      let className = e(`type-${name}`)
+      let { fontSize, fontFamily, crop, richText, ...props } = typeStyles[name]
+      let selector = `.${e(`type-${name}`)}`
+      let beforeSelector = `${selector}::before`
+      let afterSelector = `${selector}::after`
       let rules = {}
 
-      rules[`.${className}`] = props
+      if (richText) {
+        richText = Array.isArray(richText) ? richText : [richText]
+        selector = richText.reduce((selectors, tag) => {
+          return `${selectors}, .rich-text ${tag}`
+        }, selector)
+        beforeSelector = richText.reduce((selectors, tag) => {
+          return `${selectors}, .rich-text ${tag}::before`
+        }, beforeSelector)
+        afterSelector = richText.reduce((selectors, tag) => {
+          return `${selectors}, .rich-text ${tag}::after`
+        }, afterSelector)
+      }
+
+      rules[selector] = props
 
       if (crop) {
-        rules[`.${className}`].paddingTop = rules[
-          `.${className}`
-        ].paddingBottom = 1
+        rules[selector].paddingTop = rules[selector].paddingBottom = 1
 
-        rules[`.${className}::before, .${className}::after`] = {
+        rules[`${beforeSelector}, ${afterSelector}`] = {
           content: '""',
           display: 'block',
           width: 0,
           height: 0
         }
 
-        rules[`.${className}::before`] = {
+        rules[beforeSelector] = {
           marginBottom: getTopCropStyle(crop, props.lineHeight)
         }
 
-        rules[`.${className}::after`] = {
+        rules[`${afterSelector}`] = {
           marginTop: getBottomCropStyle(crop, props.lineHeight)
         }
       }
 
       let {
-        [`.${className}`]: { fontSize: baseFontSize },
+        [selector]: { fontSize: baseFontSize },
         ...responsiveFontSizeComponents
-      } = polyFluidSizing(`.${className}`, 'fontSize', fontSize, {
+      } = polyFluidSizing(selector, 'fontSize', fontSize, {
         rem: true,
         rootFontSize
       })
 
-      rules[`.${className}`].fontSize = baseFontSize
+      rules[selector].fontSize = baseFontSize
       if (fontFamily) {
-        rules[`.${className}`].fontFamily =
+        rules[selector].fontFamily =
           fontFamily.constructor === Array
             ? fontFamily
                 .map(f => (/[^a-z-]/i.test(f) ? `"${f}"` : f))
