@@ -1,7 +1,7 @@
 const polyFluidSizing = require('./polyFluidSizing.js')
 
 module.exports = function type({ rootFontSize = 16 }) {
-  return ({ theme, addComponents, e }) => {
+  return ({ theme, addComponents, e, variants: getVariants }) => {
     let typeStyles = theme('type')
     let output = []
 
@@ -68,7 +68,12 @@ module.exports = function type({ rootFontSize = 16 }) {
       output.push(rules)
     }
 
-    addComponents(output)
+    let variants = getVariants('type')
+    addComponents(
+      Array.isArray(variants) && variants.length > 0
+        ? { [`@variants ${variants.join(',')}`]: output }
+        : output
+    )
   }
 }
 
